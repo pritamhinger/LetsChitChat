@@ -45,7 +45,7 @@ class ADPLoginController: UIViewController {
     
     let emailTextField:UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Email Address"
+        textField.placeholder = "Email address"
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
