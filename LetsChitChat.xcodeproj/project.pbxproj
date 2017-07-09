@@ -14,6 +14,8 @@
 		48041BFA1F1241ED00AA4FF5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 48041BF81F1241ED00AA4FF5 /* LaunchScreen.storyboard */; };
 		48041C051F1241ED00AA4FF5 /* LetsChitChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48041C041F1241ED00AA4FF5 /* LetsChitChatTests.swift */; };
 		48041C101F1241ED00AA4FF5 /* LetsChitChatUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48041C0F1F1241ED00AA4FF5 /* LetsChitChatUITests.swift */; };
+		48041C1F1F1245BE00AA4FF5 /* ADPLoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48041C1E1F1245BE00AA4FF5 /* ADPLoginController.swift */; };
+		48041C221F12493A00AA4FF5 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48041C211F12493A00AA4FF5 /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +49,8 @@
 		48041C0B1F1241ED00AA4FF5 /* LetsChitChatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LetsChitChatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		48041C0F1F1241ED00AA4FF5 /* LetsChitChatUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetsChitChatUITests.swift; sourceTree = "<group>"; };
 		48041C111F1241ED00AA4FF5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		48041C1E1F1245BE00AA4FF5 /* ADPLoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ADPLoginController.swift; sourceTree = "<group>"; };
+		48041C211F12493A00AA4FF5 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,8 +101,9 @@
 		48041BEE1F1241ED00AA4FF5 /* LetsChitChat */ = {
 			isa = PBXGroup;
 			children = (
+				48041C201F12492500AA4FF5 /* Common */,
+				48041C1D1F12458C00AA4FF5 /* Controller */,
 				48041BEF1F1241ED00AA4FF5 /* AppDelegate.swift */,
-				48041BF11F1241ED00AA4FF5 /* ViewController.swift */,
 				48041BF31F1241ED00AA4FF5 /* Main.storyboard */,
 				48041BF61F1241ED00AA4FF5 /* Assets.xcassets */,
 				48041BF81F1241ED00AA4FF5 /* LaunchScreen.storyboard */,
@@ -123,6 +128,23 @@
 				48041C111F1241ED00AA4FF5 /* Info.plist */,
 			);
 			path = LetsChitChatUITests;
+			sourceTree = "<group>";
+		};
+		48041C1D1F12458C00AA4FF5 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				48041BF11F1241ED00AA4FF5 /* ViewController.swift */,
+				48041C1E1F1245BE00AA4FF5 /* ADPLoginController.swift */,
+			);
+			name = Controller;
+			sourceTree = "<group>";
+		};
+		48041C201F12492500AA4FF5 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				48041C211F12493A00AA4FF5 /* Extensions.swift */,
+			);
+			name = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -187,6 +209,7 @@
 		48041BE41F1241ED00AA4FF5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = ADP;
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = AppDevelapp;
@@ -263,7 +286,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				48041BF21F1241ED00AA4FF5 /* ViewController.swift in Sources */,
+				48041C1F1F1245BE00AA4FF5 /* ADPLoginController.swift in Sources */,
 				48041BF01F1241ED00AA4FF5 /* AppDelegate.swift in Sources */,
+				48041C221F12493A00AA4FF5 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
