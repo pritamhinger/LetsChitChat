@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 class ADPLoginController: UIViewController {
     
@@ -19,13 +21,14 @@ class ADPLoginController: UIViewController {
         return view
     }()
     
-    let loginButton:UIButton = {
+    lazy var loginButton:UIButton = {
         let button = UIButton(type: UIButtonType.system)
         button.backgroundColor = UIColor(r: 80, g: 101, b: 161)
         button.setTitle("Register", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitleColor(UIColor.white, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        button.addTarget(self, action: #selector(handleRegister), for: .touchUpInside)
         return button
     }()
     
@@ -137,6 +140,38 @@ class ADPLoginController: UIViewController {
         applicationLogoImageView.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -12).isActive = true
         applicationLogoImageView.widthAnchor.constraint(equalToConstant: 150).isActive = true
         applicationLogoImageView.heightAnchor.constraint(equalToConstant: 150).isActive = true
+    }
+    
+    func handleRegister() {
+        guard let email = emailTextField.text, let password = passwordTextField.text, let name = nameTextField.text else{
+            print("Invalid Email or password")
+            return
+        }
+        
+        Auth.auth().createUser(withEmail: email, password: password, completion: { (user: User?, error: Error?) -> Void in
+            if error != nil{
+                print(error!)
+                return
+            }
+            
+            print("User successfully created")
+            
+            guard let uid = user?.uid else{
+                return
+            }
+            
+            let ref = Database.database().reference()
+            let childRef = ref.child("users").child(uid)
+            let userData = ["name": name, "email": email]
+            childRef.updateChildValues(userData, withCompletionBlock: { (err, ref) in
+                if err != nil{
+                    print(err!)
+                    return
+                }
+                
+                print("User successfully saved")
+            })
+        })
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle{
