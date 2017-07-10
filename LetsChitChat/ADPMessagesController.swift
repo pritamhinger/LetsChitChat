@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import FirebaseDatabase
 
-class ViewController: UITableViewController {
+class ADPMessagesController: UITableViewController {
 
     var ref: DatabaseReference!
     
@@ -20,14 +20,33 @@ class ViewController: UITableViewController {
         ref = Database.database().reference()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(handleNewMessage))
         
+        checkIfUserIsLoggedIn()
+    }
+    
+    func checkIfUserIsLoggedIn() {
         if Auth.auth().currentUser?.uid == nil{
             // User not logged in
             perform(#selector(handleLogout), with: nil, afterDelay: 0)
         }
         else{
             // User logged in
+            let uid = Auth.auth().currentUser?.uid
+            
+            ref.child("users").child(uid!).observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                if let data = snapshot.value as? [String: AnyObject]{
+                    self.navigationItem.title = data["name"] as? String
+                }
+            }, withCancel: nil)
         }
+    }
+    
+    func handleNewMessage() {
+        let newMessageController = ADPNewMessageController()
+        let newMessageNavigationVC = UINavigationController(rootViewController: newMessageController)
+        present(newMessageNavigationVC, animated: true, completion: nil)
     }
     
     func handleLogout() {

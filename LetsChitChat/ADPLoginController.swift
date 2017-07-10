@@ -19,7 +19,7 @@ class ADPLoginController: UIViewController {
         view.layer.cornerRadius = 5
         view.layer.masksToBounds = true
         return view
-    }()
+    }() 
     
     lazy var loginButton:UIButton = {
         let button = UIButton(type: UIButtonType.system)
