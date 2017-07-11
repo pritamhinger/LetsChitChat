@@ -68,11 +68,13 @@ class ADPLoginController: UIViewController {
         return textField
     }()
     
-    let applicationLogoImageView: UIImageView = {
+    lazy var applicationLogoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "chitchat_logo")
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSelectProfileImage)))
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -167,84 +169,6 @@ class ADPLoginController: UIViewController {
         loginRegisterSegmentedControl.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -12).isActive = true
         loginRegisterSegmentedControl.widthAnchor.constraint(equalTo: containerView.widthAnchor).isActive = true
         loginRegisterSegmentedControl.heightAnchor.constraint(equalToConstant: 36).isActive = true
-    }
-    
-    func handleLoginRegister() {
-        if loginRegisterSegmentedControl.selectedSegmentIndex == 0{
-            handleLogin()
-        }else{
-            handleRegister()
-        }
-    }
-    
-    func handleLogin() {
-        guard let email = emailTextField.text, let password = passwordTextField.text else {
-            print("Invalid Credentials")
-            return
-        }
-        
-        Auth.auth().signIn(withEmail: email, password: password, completion: { (user, error) in
-            if error != nil{
-                print(error!)
-                return
-            }
-            
-            self.dismiss(animated: true, completion: nil)
-        })
-    }
-    
-    func handleRegister() {
-        guard let email = emailTextField.text, let password = passwordTextField.text, let name = nameTextField.text else{
-            print("Invalid Email or password")
-            return
-        }
-        
-        Auth.auth().createUser(withEmail: email, password: password, completion: { (user: User?, error: Error?) -> Void in
-            if error != nil{
-                print(error!)
-                return
-            }
-            
-            print("User successfully created")
-            
-            guard let uid = user?.uid else{
-                return
-            }
-            
-            let ref = Database.database().reference()
-            let childRef = ref.child("users").child(uid)
-            let userData = ["name": name, "email": email]
-            childRef.updateChildValues(userData, withCompletionBlock: { (err, ref) in
-                if err != nil{
-                    print(err!)
-                    return
-                }
-                
-                print("User successfully saved")
-                self.dismiss(animated: true, completion: nil)
-            })
-        })
-    }
-    
-    func handleLoginRegisterSegmentChanged() {
-        let title = loginRegisterSegmentedControl.titleForSegment(at: loginRegisterSegmentedControl.selectedSegmentIndex)
-        loginButton.setTitle(title, for: .normal)
-        
-        containerViewHeightAnchor?.constant = (loginRegisterSegmentedControl.selectedSegmentIndex == 0) ? 100 : 150
-        
-        nameTextFieldHeightAnchor?.isActive = false
-        nameTextFieldHeightAnchor = nameTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: (loginRegisterSegmentedControl.selectedSegmentIndex == 0 ? 0 : 1/3))
-        nameTextFieldHeightAnchor?.isActive = true
-        nameTextField.placeholder = loginRegisterSegmentedControl.selectedSegmentIndex == 0 ? "" : "Name"
-        
-        emailTextFieldHeightAnchor?.isActive = false
-        emailTextFieldHeightAnchor = emailTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: (loginRegisterSegmentedControl.selectedSegmentIndex == 0 ? 1/2 : 1/3))
-        emailTextFieldHeightAnchor?.isActive = true
-        
-        passwordTextFieldHeightAnchor?.isActive = false
-        passwordTextFieldHeightAnchor = passwordTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor, multiplier: (loginRegisterSegmentedControl.selectedSegmentIndex == 0 ? 1/2 : 1/3))
-        passwordTextFieldHeightAnchor?.isActive = true
-        
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle{
