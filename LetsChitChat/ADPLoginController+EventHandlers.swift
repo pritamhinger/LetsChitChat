@@ -53,8 +53,8 @@ extension ADPLoginController{
                 return
             }
             
-            let storageRef = Storage.storage().reference().child("\(uid).png")
-            if let imageData = UIImagePNGRepresentation(self.applicationLogoImageView.image!){
+            let storageRef = Storage.storage().reference().child("\(uid).jpg")
+            if let profileImage = self.applicationLogoImageView.image, let imageData = UIImageJPEGRepresentation(profileImage, 0.1){
                 storageRef.putData(imageData, metadata: nil, completion: { (metadata, storageError) in
                     if storageError != nil{
                         print(storageError!)
@@ -102,7 +102,7 @@ extension ADPLoginController{
             }
             
             print("User successfully saved")
-            self.messageControllerVC?.fetchUserAndSetUserDetailsOnUI()
+            self.messageControllerVC?.navigationItem.title = userData["name"]
             self.dismiss(animated: true, completion: nil)
         })
     }
