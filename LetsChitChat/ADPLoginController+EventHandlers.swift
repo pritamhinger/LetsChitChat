@@ -102,7 +102,9 @@ extension ADPLoginController{
             }
             
             print("User successfully saved")
-            self.messageControllerVC?.navigationItem.title = userData["name"]
+            let user = ChatUser()
+            user.setValuesForKeys(userData)
+            self.messageControllerVC?.setUpNavBar(withUser: user)
             self.dismiss(animated: true, completion: nil)
         })
     }
