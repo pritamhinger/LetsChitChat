@@ -12,6 +12,8 @@ import FirebaseAuth
 
 class ADPLoginController: UIViewController {
     
+    var messageControllerVC: ADPMessagesController?
+    
     let containerView:UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.white

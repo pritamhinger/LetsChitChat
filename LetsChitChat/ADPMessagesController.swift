@@ -32,14 +32,7 @@ class ADPMessagesController: UITableViewController {
         }
         else{
             // User logged in
-            let uid = Auth.auth().currentUser?.uid
-            
-            ref.child("users").child(uid!).observeSingleEvent(of: .value, with: { (snapshot) in
-                
-                if let data = snapshot.value as? [String: AnyObject]{
-                    self.navigationItem.title = data["name"] as? String
-                }
-            }, withCancel: nil)
+            fetchUserAndSetUserDetailsOnUI()
         }
     }
     
@@ -59,7 +52,22 @@ class ADPMessagesController: UITableViewController {
         }
         
         let loginController = ADPLoginController()
+        loginController.messageControllerVC = self
         present(loginController, animated: true, completion: nil)
+    }
+    
+    func fetchUserAndSetUserDetailsOnUI() {
+        guard let uid = Auth.auth().currentUser?.uid else{
+            print("User not logged in")
+            return
+        }
+        
+        ref.child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            if let data = snapshot.value as? [String: AnyObject]{
+                self.navigationItem.title = data["name"] as? String
+            }
+        }, withCancel: nil)
     }
 }
 

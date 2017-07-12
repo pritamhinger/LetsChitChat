@@ -30,6 +30,7 @@ extension ADPLoginController{
                 return
             }
             
+            self.messageControllerVC?.fetchUserAndSetUserDetailsOnUI()
             self.dismiss(animated: true, completion: nil)
         })
     }
@@ -101,6 +102,7 @@ extension ADPLoginController{
             }
             
             print("User successfully saved")
+            self.messageControllerVC?.fetchUserAndSetUserDetailsOnUI()
             self.dismiss(animated: true, completion: nil)
         })
     }
