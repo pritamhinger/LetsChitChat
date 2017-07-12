@@ -128,7 +128,7 @@
 			children = (
 				4806A2611F153BD50075BD40 /* Extensions */,
 				48B45D081F13F1930097CB23 /* Model */,
-				48041C201F12492500AA4FF5 /* Common */,
+				48041C201F12492500AA4FF5 /* Helpers */,
 				48041C1D1F12458C00AA4FF5 /* Controller */,
 				48041BEF1F1241ED00AA4FF5 /* AppDelegate.swift */,
 				48041BF31F1241ED00AA4FF5 /* Main.storyboard */,
@@ -168,12 +168,12 @@
 			name = Controller;
 			sourceTree = "<group>";
 		};
-		48041C201F12492500AA4FF5 /* Common */ = {
+		48041C201F12492500AA4FF5 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
 				48041C211F12493A00AA4FF5 /* Extensions.swift */,
 			);
-			name = Common;
+			name = Helpers;
 			sourceTree = "<group>";
 		};
 		4806A2611F153BD50075BD40 /* Extensions */ = {
