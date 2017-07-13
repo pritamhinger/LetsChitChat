@@ -117,6 +117,13 @@ class ADPMessagesController: UITableViewController {
         containerView.centerXAnchor.constraint(equalTo: titleView.centerXAnchor).isActive = true
         
         self.navigationItem.titleView = titleView
+        
+        titleView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showChatController)))
+    }
+    
+    func showChatController() {
+        let chatController = ADPChatController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(chatController, animated: true)
     }
 }
 
