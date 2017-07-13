@@ -22,6 +22,7 @@
 		4806A2631F153BF30075BD40 /* ADPLoginController+EventHandlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4806A2621F153BF30075BD40 /* ADPLoginController+EventHandlers.swift */; };
 		4880E6011F17274D00C4D11B /* ADPChatController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4880E6001F17274D00C4D11B /* ADPChatController.swift */; };
 		4883016C1F13ECCC008E3B67 /* ADPNewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4883016B1F13ECCC008E3B67 /* ADPNewMessageController.swift */; };
+		4899390A1F17EB3B00309586 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489939091F17EB3B00309586 /* ChatMessage.swift */; };
 		48B45D0A1F13F1B30097CB23 /* ChatUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B45D091F13F1B30097CB23 /* ChatUser.swift */; };
 		CF954BF0588FA24A33614519 /* Pods_LetsChitChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E51C38809DC106C0D9997E6 /* Pods_LetsChitChat.framework */; };
 /* End PBXBuildFile section */
@@ -64,6 +65,7 @@
 		4806A2621F153BF30075BD40 /* ADPLoginController+EventHandlers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ADPLoginController+EventHandlers.swift"; sourceTree = "<group>"; };
 		4880E6001F17274D00C4D11B /* ADPChatController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ADPChatController.swift; sourceTree = "<group>"; };
 		4883016B1F13ECCC008E3B67 /* ADPNewMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ADPNewMessageController.swift; sourceTree = "<group>"; };
+		489939091F17EB3B00309586 /* ChatMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		48B45D091F13F1B30097CB23 /* ChatUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatUser.swift; sourceTree = "<group>"; };
 		48C31D0460CC1C080FA5E011 /* Pods_LetsChitChatUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LetsChitChatUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6555951EDA004E05A0823706 /* Pods-LetsChitChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LetsChitChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LetsChitChat/Pods-LetsChitChat.debug.xcconfig"; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				48B45D091F13F1B30097CB23 /* ChatUser.swift */,
+				489939091F17EB3B00309586 /* ChatMessage.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -504,6 +507,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4899390A1F17EB3B00309586 /* ChatMessage.swift in Sources */,
 				48041BF21F1241ED00AA4FF5 /* ADPMessagesController.swift in Sources */,
 				48041C1F1F1245BE00AA4FF5 /* ADPLoginController.swift in Sources */,
 				4806A2631F153BF30075BD40 /* ADPLoginController+EventHandlers.swift in Sources */,

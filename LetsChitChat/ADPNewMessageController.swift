@@ -13,6 +13,7 @@ class ADPNewMessageController: UITableViewController {
 
     let cellReuseIdentifier = "newMessageCell"
     var ref: DatabaseReference!
+    var messagesController:ADPMessagesController?
     
     var users = [ChatUser]()
     
@@ -31,6 +32,7 @@ class ADPNewMessageController: UITableViewController {
             print(snapshot)
             if let data = snapshot.value as? [String: AnyObject]{
                 let user = ChatUser()
+                user.id = snapshot.key
                 user.setValuesForKeys(data)
                 print("User Data: Name : \(String(describing: user.name)) and Email: \(String(describing: user.email))")
                 self.users.append(user)
@@ -66,6 +68,14 @@ class ADPNewMessageController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 72
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        dismiss(animated: true, completion: {
+            print("Dismiss Completed")
+            let user = self.users[indexPath.row]
+            self.messagesController?.showChatController(withUser: user)
+        })
     }
 }
 

@@ -13,6 +13,7 @@ import FirebaseDatabase
 class ADPMessagesController: UITableViewController {
 
     var ref: DatabaseReference!
+    var messages = [ChatMessage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,6 +24,21 @@ class ADPMessagesController: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(handleNewMessage))
         
         checkIfUserIsLoggedIn()
+        observeMessages()
+    }
+    
+    func observeMessages() {
+        let ref  = Database.database().reference().child("messages")
+        ref.observe(.childAdded, with: {(snapshot) in
+            let message = ChatMessage()
+            if let chatData = snapshot.value as? [String: AnyObject]{
+                message.setValuesForKeys(chatData)
+                self.messages.append(message)
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }, withCancel: nil)
     }
     
     func checkIfUserIsLoggedIn() {
@@ -38,6 +54,7 @@ class ADPMessagesController: UITableViewController {
     
     func handleNewMessage() {
         let newMessageController = ADPNewMessageController()
+        newMessageController.messagesController = self
         let newMessageNavigationVC = UINavigationController(rootViewController: newMessageController)
         present(newMessageNavigationVC, animated: true, completion: nil)
     }
@@ -117,13 +134,26 @@ class ADPMessagesController: UITableViewController {
         containerView.centerXAnchor.constraint(equalTo: titleView.centerXAnchor).isActive = true
         
         self.navigationItem.titleView = titleView
-        
-        titleView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showChatController)))
     }
     
-    func showChatController() {
+    func showChatController(withUser user:ChatUser) {
         let chatController = ADPChatController(collectionViewLayout: UICollectionViewFlowLayout())
+        chatController.user = user
         navigationController?.pushViewController(chatController, animated: true)
+    }
+}
+
+extension ADPMessagesController{
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cellId")
+        let message = messages[indexPath.row]
+        cell.textLabel?.text = message.text
+        cell.detailTextLabel?.text = message.toId
+        return cell
     }
 }
 

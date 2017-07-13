@@ -11,6 +11,12 @@ import Firebase
 
 class ADPChatController: UICollectionViewController, UITextFieldDelegate {
 
+    var user:ChatUser?{
+        didSet{
+            navigationItem.title = user?.name
+        }
+    }
+    
     lazy var inputTextField : UITextField = {
         let textField = UITextField()
         textField.placeholder = "Enter message to send..."
@@ -22,7 +28,6 @@ class ADPChatController: UICollectionViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = "Chat Logs"
         collectionView?.backgroundColor = UIColor.white
         setUpInputComponents()
     }
@@ -71,7 +76,10 @@ class ADPChatController: UICollectionViewController, UITextFieldDelegate {
     func sendMesage() {
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
-        let values = ["text" : inputTextField.text!, "name": "Pritam Hinger"]
+        let userId = user?.id!
+        let fromUserId = Auth.auth().currentUser?.uid
+        let timestamp: NSNumber = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
+        let values = ["text" : inputTextField.text!, "toId": userId!, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
         childRef.updateChildValues(values)
         inputTextField.text = ""
     }
