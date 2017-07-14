@@ -20,6 +20,7 @@
 		48041C221F12493A00AA4FF5 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48041C211F12493A00AA4FF5 /* Extensions.swift */; };
 		48041C241F12961600AA4FF5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 48041C231F12961600AA4FF5 /* GoogleService-Info.plist */; };
 		4806A2631F153BF30075BD40 /* ADPLoginController+EventHandlers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4806A2621F153BF30075BD40 /* ADPLoginController+EventHandlers.swift */; };
+		4879FEDB1F187D3E004E00C8 /* NewMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4879FEDA1F187D3E004E00C8 /* NewMessageCell.swift */; };
 		4880E6011F17274D00C4D11B /* ADPChatController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4880E6001F17274D00C4D11B /* ADPChatController.swift */; };
 		4883016C1F13ECCC008E3B67 /* ADPNewMessageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4883016B1F13ECCC008E3B67 /* ADPNewMessageController.swift */; };
 		4899390A1F17EB3B00309586 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489939091F17EB3B00309586 /* ChatMessage.swift */; };
@@ -63,6 +64,7 @@
 		48041C211F12493A00AA4FF5 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		48041C231F12961600AA4FF5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4806A2621F153BF30075BD40 /* ADPLoginController+EventHandlers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ADPLoginController+EventHandlers.swift"; sourceTree = "<group>"; };
+		4879FEDA1F187D3E004E00C8 /* NewMessageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageCell.swift; sourceTree = "<group>"; };
 		4880E6001F17274D00C4D11B /* ADPChatController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ADPChatController.swift; sourceTree = "<group>"; };
 		4883016B1F13ECCC008E3B67 /* ADPNewMessageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ADPNewMessageController.swift; sourceTree = "<group>"; };
 		489939091F17EB3B00309586 /* ChatMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 		48041BEE1F1241ED00AA4FF5 /* LetsChitChat */ = {
 			isa = PBXGroup;
 			children = (
+				4879FED91F187D0B004E00C8 /* View */,
 				4806A2611F153BD50075BD40 /* Extensions */,
 				48B45D081F13F1930097CB23 /* Model */,
 				48041C201F12492500AA4FF5 /* Helpers */,
@@ -187,6 +190,14 @@
 				4806A2621F153BF30075BD40 /* ADPLoginController+EventHandlers.swift */,
 			);
 			name = Extensions;
+			sourceTree = "<group>";
+		};
+		4879FED91F187D0B004E00C8 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				4879FEDA1F187D3E004E00C8 /* NewMessageCell.swift */,
+			);
+			name = View;
 			sourceTree = "<group>";
 		};
 		48B45D081F13F1930097CB23 /* Model */ = {
@@ -509,6 +520,7 @@
 			files = (
 				4899390A1F17EB3B00309586 /* ChatMessage.swift in Sources */,
 				48041BF21F1241ED00AA4FF5 /* ADPMessagesController.swift in Sources */,
+				4879FEDB1F187D3E004E00C8 /* NewMessageCell.swift in Sources */,
 				48041C1F1F1245BE00AA4FF5 /* ADPLoginController.swift in Sources */,
 				4806A2631F153BF30075BD40 /* ADPLoginController+EventHandlers.swift in Sources */,
 				4880E6011F17274D00C4D11B /* ADPChatController.swift in Sources */,

@@ -12,8 +12,11 @@ import FirebaseDatabase
 
 class ADPMessagesController: UITableViewController {
 
+    let cellId = "cellId"
+    
     var ref: DatabaseReference!
     var messages = [ChatMessage]()
+    var messageDictionary = [String : ChatMessage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +27,9 @@ class ADPMessagesController: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(handleNewMessage))
         
         checkIfUserIsLoggedIn()
+        
+        tableView.register(NewMessageCell.self, forCellReuseIdentifier: cellId)
+        
         observeMessages()
     }
     
@@ -33,7 +39,17 @@ class ADPMessagesController: UITableViewController {
             let message = ChatMessage()
             if let chatData = snapshot.value as? [String: AnyObject]{
                 message.setValuesForKeys(chatData)
-                self.messages.append(message)
+                
+                //self.messages.append(message)
+                
+                if let toId = message.toId{
+                    self.messageDictionary[toId] = message
+                    self.messages = Array(self.messageDictionary.values)
+                    self.messages.sort(by: { (message1, message2) -> Bool in
+                        return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
+                    })
+                }
+                
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
@@ -149,11 +165,16 @@ extension ADPMessagesController{
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cellId")
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! NewMessageCell
+        
         let message = messages[indexPath.row]
-        cell.textLabel?.text = message.text
-        cell.detailTextLabel?.text = message.toId
+        cell.message = message
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 72
     }
 }
 
