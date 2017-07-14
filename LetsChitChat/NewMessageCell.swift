@@ -13,29 +13,40 @@ class NewMessageCell : UITableViewCell{
     
     var message: ChatMessage? {
         didSet{
-            if let toId = message?.toId{
-                let ref = Database.database().reference().child("users").child(toId)
-                ref.observe(.value, with: { (snapshot) in
-                    print(snapshot)
-                    if let senderData = snapshot.value as? [String: AnyObject]{
-                        self.textLabel?.text = senderData["name"] as? String
-                        if let profileImageURL = senderData["profileImageURL"] as? String{
-                            print("loading image")
-                            self.profileImageView.loadImageFromCache(withUrl: profileImageURL)
-                        }
-                    }
-                }, withCancel: nil)
-            }
-            
-            
+            setupNameAndUserProfileImage()
             detailTextLabel?.text = message?.text!
             if let seconds = message?.timestamp?.doubleValue{
                 let date = Date(timeIntervalSince1970: seconds)
-                let dateFormatter = DateFormatter()
+                let dateFormatter =  DateFormatter()
                 dateFormatter.dateFormat = "hh:mm:ss a"
                 timeLabel.text = dateFormatter.string(from: date)
             }
             
+        }
+    }
+    
+    func setupNameAndUserProfileImage() {
+        
+        let chatPartnerId:String?
+        if message?.fromId == Auth.auth().currentUser?.uid{
+            chatPartnerId = message?.toId
+        }else{
+            chatPartnerId = message?.fromId
+        }
+        
+        
+        if let id = chatPartnerId{
+            let ref = Database.database().reference().child("users").child(id)
+            ref.observe(.value, with: { (snapshot) in
+                print(snapshot)
+                if let senderData = snapshot.value as? [String: AnyObject]{
+                    self.textLabel?.text = senderData["name"] as? String
+                    if let profileImageURL = senderData["profileImageURL"] as? String{
+                        print("loading image")
+                        self.profileImageView.loadImageFromCache(withUrl: profileImageURL)
+                    }
+                }
+            }, withCancel: nil)
         }
     }
     
@@ -51,7 +62,6 @@ class NewMessageCell : UITableViewCell{
     
     let timeLabel : UILabel = {
         let label = UILabel()
-        label.text = "HH:mm:ss"
         label.textColor = UIColor.darkGray
         label.font = UIFont.systemFont(ofSize: 13)
         label.translatesAutoresizingMaskIntoConstraints = false

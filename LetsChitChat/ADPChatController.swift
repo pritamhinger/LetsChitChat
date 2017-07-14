@@ -76,11 +76,25 @@ class ADPChatController: UICollectionViewController, UITextFieldDelegate {
     func sendMesage() {
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
-        let userId = user?.id!
-        let fromUserId = Auth.auth().currentUser?.uid
+        let userId = user!.id!
+        let fromUserId = Auth.auth().currentUser!.uid
         let timestamp: NSNumber = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
-        let values = ["text" : inputTextField.text!, "toId": userId!, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
-        childRef.updateChildValues(values)
+        let values = ["text" : inputTextField.text!, "toId": userId, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
+        //childRef.updateChildValues(values)
+        childRef.updateChildValues(values, withCompletionBlock: { (error,  ref) in
+            if error != nil{
+                print(error!)
+                return
+            }
+            
+            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserId)
+            
+            let messageId = childRef.key
+            userMessageRef.updateChildValues([messageId: 1])
+            
+            let recepientUserMessageRef = Database.database().reference().child("user-messages").child(userId)
+            recepientUserMessageRef.updateChildValues([messageId: 1])
+        })
         inputTextField.text = ""
     }
 }
