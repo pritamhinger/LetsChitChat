@@ -30,7 +30,6 @@ class NewMessageCell : UITableViewCell{
         if let id = message?.chatPartnerId(){
             let ref = Database.database().reference().child("users").child(id)
             ref.observe(.value, with: { (snapshot) in
-                print(snapshot)
                 if let senderData = snapshot.value as? [String: AnyObject]{
                     self.textLabel?.text = senderData["name"] as? String
                     if let profileImageURL = senderData["profileImageURL"] as? String{

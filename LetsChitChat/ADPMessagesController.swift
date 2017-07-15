@@ -53,8 +53,8 @@ class ADPMessagesController: UITableViewController {
                     
                     //self.messages.append(message)
                     
-                    if let toId = message.toId{
-                        self.messageDictionary[toId] = message
+                    if let chatPartnerId = message.chatPartnerId(){
+                        self.messageDictionary[chatPartnerId] = message
                         self.messages = Array(self.messageDictionary.values)
                         self.messages.sort(by: { (message1, message2) -> Bool in
                             return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
@@ -69,29 +69,29 @@ class ADPMessagesController: UITableViewController {
         }, withCancel: nil)
     }
     
-    func observeMessages() {
-        let ref  = Database.database().reference().child("messages")
-        ref.observe(.childAdded, with: {(snapshot) in
-            let message = ChatMessage()
-            if let chatData = snapshot.value as? [String: AnyObject]{
-                message.setValuesForKeys(chatData)
-                
-                //self.messages.append(message)
-                
-                if let toId = message.toId{
-                    self.messageDictionary[toId] = message
-                    self.messages = Array(self.messageDictionary.values)
-                    self.messages.sort(by: { (message1, message2) -> Bool in
-                        return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
-                    })
-                }
-                
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            }
-        }, withCancel: nil)
-    }
+//    func observeMessages() {
+//        let ref  = Database.database().reference().child("messages")
+//        ref.observe(.childAdded, with: {(snapshot) in
+//            let message = ChatMessage()
+//            if let chatData = snapshot.value as? [String: AnyObject]{
+//                message.setValuesForKeys(chatData)
+//                
+//                //self.messages.append(message)
+//                
+//                if let toId = message.toId{
+//                    self.messageDictionary[toId] = message
+//                    self.messages = Array(self.messageDictionary.values)
+//                    self.messages.sort(by: { (message1, message2) -> Bool in
+//                        return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
+//                    })
+//                }
+//                
+//                DispatchQueue.main.async {
+//                    self.tableView.reloadData()
+//                }
+//            }
+//        }, withCancel: nil)
+//    }
     
     func checkIfUserIsLoggedIn() {
         if Auth.auth().currentUser?.uid == nil{
