@@ -213,6 +213,26 @@ extension ADPMessagesController{
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let message = messages[indexPath.row]
+        guard let chatPartnerId = message.chatPartnerId() else {
+            print("Failed to ge chat partner id")
+            return
+        }
+        
+        let ref = Database.database().reference().child("users").child(chatPartnerId)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            guard let userData = snapshot.value as? [String : AnyObject] else{
+                return
+            }
+            
+            let user = ChatUser()
+            user.id = chatPartnerId
+            user.setValuesForKeys(userData)
+            self.showChatController(withUser: user)
+        }, withCancel: nil)
+    }
+    
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 72
     }

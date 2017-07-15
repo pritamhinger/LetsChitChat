@@ -27,15 +27,7 @@ class NewMessageCell : UITableViewCell{
     
     func setupNameAndUserProfileImage() {
         
-        let chatPartnerId:String?
-        if message?.fromId == Auth.auth().currentUser?.uid{
-            chatPartnerId = message?.toId
-        }else{
-            chatPartnerId = message?.fromId
-        }
-        
-        
-        if let id = chatPartnerId{
+        if let id = message?.chatPartnerId(){
             let ref = Database.database().reference().child("users").child(id)
             ref.observe(.value, with: { (snapshot) in
                 print(snapshot)

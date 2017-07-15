@@ -9,12 +9,48 @@
 import UIKit
 import Firebase
 
-class ADPChatController: UICollectionViewController, UITextFieldDelegate {
+class ADPChatController: UICollectionViewController {
 
+    let cellId = "cellId"
+    
     var user:ChatUser?{
         didSet{
             navigationItem.title = user?.name
+            obserMessageForUser()
         }
+    }
+    
+    var messages = [ChatMessage]()
+    
+    func obserMessageForUser() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        
+        let userMessagesRef = Database.database().reference().child("user-messages").child(uid)
+        
+        userMessagesRef.observe(.childAdded, with: { (snapshot) in
+            let messageId = snapshot.key
+            let messageRef = Database.database().reference().child("messages").child(messageId)
+            
+            messageRef.observeSingleEvent(of: .value, with: { (messageSnapshot) in
+                guard let messageData = messageSnapshot.value as? [String: AnyObject] else{
+                    return
+                }
+                
+                let message = ChatMessage()
+                message.setValuesForKeys(messageData)
+                if message.chatPartnerId() == self.user?.id{
+                    self.messages.append(message)
+                    
+                    DispatchQueue.main.async {
+                        self.collectionView?.reloadData()
+                    }
+                }
+                
+            }, withCancel: nil)
+            
+        }, withCancel: nil)
     }
     
     lazy var inputTextField : UITextField = {
@@ -29,13 +65,15 @@ class ADPChatController: UICollectionViewController, UITextFieldDelegate {
         super.viewDidLoad()
         
         collectionView?.backgroundColor = UIColor.white
+        collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.alwaysBounceVertical = true
         setUpInputComponents()
     }
     
     func setUpInputComponents() {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        
+        containerView.backgroundColor = UIColor.white
         view.addSubview(containerView)
         
         containerView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
@@ -99,9 +137,27 @@ class ADPChatController: UICollectionViewController, UITextFieldDelegate {
     }
 }
 
-extension ADPChatController{
+extension ADPChatController: UITextFieldDelegate{
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         sendMesage()
         return true
+    }
+}
+
+extension ADPChatController: UICollectionViewDelegateFlowLayout{
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: view.frame.width, height: 80)
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
+        let message = messages[indexPath.item]
+        cell.textView.text = message.text!
+        return cell
     }
 }
