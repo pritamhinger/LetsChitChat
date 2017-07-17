@@ -29,12 +29,10 @@ class ADPNewMessageController: UITableViewController {
 
     func fetchUsers() {
         ref.child("users").observe(.childAdded, with: { (snapshot) in
-            print(snapshot)
             if let data = snapshot.value as? [String: AnyObject]{
                 let user = ChatUser()
                 user.id = snapshot.key
                 user.setValuesForKeys(data)
-                print("User Data: Name : \(String(describing: user.name)) and Email: \(String(describing: user.email))")
                 self.users.append(user)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -72,7 +70,6 @@ class ADPNewMessageController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         dismiss(animated: true, completion: {
-            print("Dismiss Completed")
             let user = self.users[indexPath.row]
             self.messagesController?.showChatController(withUser: user)
         })

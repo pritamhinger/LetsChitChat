@@ -32,35 +32,17 @@ class ADPMessagesController: UITableViewController {
     }
     
     func observeUserMessage() {
-        guard let userId = Auth.auth().currentUser?.uid else{
+        guard let uId = Auth.auth().currentUser?.uid else{
             print("Invalid User");
             return
         }
         
-        let ref = Database.database().reference().child("user-messages").child(userId)
+        let ref = Database.database().reference().child("user-messages").child(uId)
         ref.observe(.childAdded, with: { (snapshot) in
-            print(snapshot)
-            let messageId = snapshot.key
-            let messageRef = Database.database().reference().child("messages").child(messageId)
-            messageRef.observe(.value, with: { (messageSnapshot) in
-                print(messageSnapshot)
-                let message = ChatMessage()
-                if let chatData = messageSnapshot.value as? [String: AnyObject]{
-                    message.setValuesForKeys(chatData)
-                    
-                    //self.messages.append(message)
-                    
-                    if let chatPartnerId = message.chatPartnerId(){
-                        self.messageDictionary[chatPartnerId] = message
-                        self.messages = Array(self.messageDictionary.values)
-                        self.messages.sort(by: { (message1, message2) -> Bool in
-                            return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
-                        })
-                    }
-                    
-                    self.timer?.invalidate()
-                    self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
-                }
+            let userId = snapshot.key
+            Database.database().reference().child("user-messages").child(uId).child(userId).observe(.childAdded, with: { (snapshot) in
+                let messageId = snapshot.key
+                self.fetchMessages(withMessageId: messageId)
             }, withCancel: nil)
         }, withCancel: nil)
     }
@@ -68,9 +50,37 @@ class ADPMessagesController: UITableViewController {
     var timer:Timer?
     
     func handleReloadTable() {
+        self.messages = Array(self.messageDictionary.values)
+        self.messages.sort(by: { (message1, message2) -> Bool in
+            return (message1.timestamp?.intValue)! > (message2.timestamp?.intValue)!
+        })
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
+    }
+    
+    func fetchMessages(withMessageId messageId: String) {
+        let messageRef = Database.database().reference().child("messages").child(messageId)
+        messageRef.observe(.value, with: { (messageSnapshot) in
+            let message = ChatMessage()
+            if let chatData = messageSnapshot.value as? [String: AnyObject]{
+                
+                message.setValuesForKeys(chatData)
+                
+                if let chatPartnerId = message.chatPartnerId(){
+                    self.messageDictionary[chatPartnerId] = message
+                }
+                
+                self.attemptToReloadTable()
+            }
+        }, withCancel: nil)
+    }
+    
+    private func attemptToReloadTable() {
+        
+        self.timer?.invalidate()
+        self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
     }
     
     func checkIfUserIsLoggedIn() {

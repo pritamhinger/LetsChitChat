@@ -47,7 +47,6 @@ extension ADPLoginController{
                 return
             }
             
-            print("User successfully created")
             
             guard let uid = user?.uid else{
                 return
@@ -64,7 +63,6 @@ extension ADPLoginController{
                     if let profileURL = metadata?.downloadURL()?.absoluteString{
                         let userProfileData = ["name": name, "email": email, "profileImageURL": profileURL]
                         self.addUserProfileInfoIntoDB(withUID: uid, userData: userProfileData)
-                        print(metadata!)
                     }
                 })
             }
@@ -101,7 +99,6 @@ extension ADPLoginController{
                 return
             }
             
-            print("User successfully saved")
             let user = ChatUser()
             user.setValuesForKeys(userData)
             self.messageControllerVC?.setUpNavBar(withUser: user)
@@ -123,12 +120,10 @@ extension ADPLoginController : UIImagePickerControllerDelegate, UINavigationCont
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        print(info)
         var selectedImageFromPicker:UIImage?
         if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage{
             selectedImageFromPicker = editedImage
         }else if let selectedImage = info["UIImagePickerControllerOriginalImage"] as? UIImage{
-            print(selectedImage.size)
             selectedImageFromPicker = selectedImage
         }
         

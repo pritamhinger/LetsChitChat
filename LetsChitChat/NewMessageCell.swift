@@ -33,7 +33,6 @@ class NewMessageCell : UITableViewCell{
                 if let senderData = snapshot.value as? [String: AnyObject]{
                     self.textLabel?.text = senderData["name"] as? String
                     if let profileImageURL = senderData["profileImageURL"] as? String{
-                        print("loading image")
                         self.profileImageView.loadImageFromCache(withUrl: profileImageURL)
                     }
                 }

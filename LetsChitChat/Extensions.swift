@@ -31,7 +31,6 @@ extension UIImageView{
                 print(error!)
             }
             else{
-                print("setting image")
                 DispatchQueue.main.async {
                     if let downloadedImage = UIImage(data: data!){
                         imageCahce.setObject(downloadedImage, forKey: urlString as AnyObject)
