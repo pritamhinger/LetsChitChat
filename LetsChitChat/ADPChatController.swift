@@ -64,19 +64,29 @@ class ADPChatController: UICollectionViewController {
         super.viewDidLoad()
         
         collectionView?.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-        //collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         collectionView?.backgroundColor = UIColor.white
         collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .interactive
-//        setUpInputComponents()
-//        setUpKeyboarsObservers()
     }
     
     lazy var inputContainerView:UIView = {
         let containerView = UIView()
         containerView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
         containerView.backgroundColor = UIColor.white
+        
+        let imagePickerButtonImageView = UIImageView()
+        imagePickerButtonImageView.image = UIImage(named: "imagePicker")
+        imagePickerButtonImageView.translatesAutoresizingMaskIntoConstraints = false
+        imagePickerButtonImageView.isUserInteractionEnabled = true
+        imagePickerButtonImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(pickImageToSend)))
+        
+        containerView.addSubview(imagePickerButtonImageView)
+        
+        imagePickerButtonImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+        imagePickerButtonImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
+        imagePickerButtonImageView.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        imagePickerButtonImageView.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
         let sendButton = UIButton(type: .system)
         sendButton.setTitle("Send", for: .normal)
@@ -91,7 +101,7 @@ class ADPChatController: UICollectionViewController {
         
         containerView.addSubview(self.inputTextField)
         
-        self.inputTextField.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 8).isActive = true
+        self.inputTextField.leftAnchor.constraint(equalTo: imagePickerButtonImageView.rightAnchor, constant: 8).isActive = true
         self.inputTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
         self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
         self.inputTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
@@ -123,6 +133,14 @@ class ADPChatController: UICollectionViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    func pickImageToSend() {
+        print("launch")
+        let imagePickerVC = UIImagePickerController()
+        imagePickerVC.delegate = self
+        imagePickerVC.allowsEditing = true
+        present(imagePickerVC, animated: true, completion: nil)
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -224,12 +242,77 @@ class ADPChatController: UICollectionViewController {
         
         inputTextField.text = nil
     }
+    
+    fileprivate func sendMessage(withImageURL url:String){
+        let ref = Database.database().reference().child("messages")
+        let childRef = ref.childByAutoId()
+        let userId = user!.id!
+        let fromUserId = Auth.auth().currentUser!.uid
+        let timestamp: NSNumber = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
+        let values = ["imageUrl" : url, "toId": userId, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
+        //childRef.updateChildValues(values)
+        childRef.updateChildValues(values, withCompletionBlock: { (error,  ref) in
+            if error != nil{
+                print(error!)
+                return
+            }
+            
+            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserId).child(userId)
+            
+            let messageId = childRef.key
+            userMessageRef.updateChildValues([messageId: 1])
+            
+            let recepientUserMessageRef = Database.database().reference().child("user-messages").child(userId).child(fromUserId)
+            recepientUserMessageRef.updateChildValues([messageId: 1])
+        })
+    }
 }
 
 extension ADPChatController: UITextFieldDelegate{
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         sendMesage()
         return true
+    }
+}
+
+extension ADPChatController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        var selectedImageFromPicker:UIImage?
+        if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage{
+            selectedImageFromPicker = editedImage
+        }else if let selectedImage = info["UIImagePickerControllerOriginalImage"] as? UIImage{
+            selectedImageFromPicker = selectedImage
+        }
+        
+        if let newImage = selectedImageFromPicker{
+            uploadImageToFirebaseStorage(image: newImage)
+        }
+        
+        dismiss(animated: true, completion: nil )
+    }
+    
+    func uploadImageToFirebaseStorage(image: UIImage) {
+        
+        let imageName = UUID().uuidString
+        let ref = Storage.storage().reference().child("message_images").child(imageName)
+        if let uploadData = UIImageJPEGRepresentation(image, 0.2){
+            ref.putData(uploadData, metadata: nil, completion: { (metadata, error) in
+                if error != nil{
+                    print("failed to save image")
+                    return
+                }
+                
+                if let imageUrl = metadata?.downloadURL()?.absoluteString{
+                    self.sendMessage(withImageURL: imageUrl)
+                }
+            })
+        }
+        
+        
     }
 }
 
@@ -259,15 +342,27 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
         let message = messages[indexPath.item]
-        cell.textView.text = message.text!
+        cell.textView.text = message.text
         setUpCell(cell: cell, message: message)
-        cell.bubbleWidthAnchor?.constant = estimatedFrame(forText: message.text!).width + 32
+        if let messageText = message.text{
+            cell.bubbleWidthAnchor?.constant = estimatedFrame(forText: messageText).width + 32
+        }
+        
         return cell
     }
     
     func setUpCell(cell: ChatMessageCell, message:ChatMessage) {
         if let profileImageURL = self.user?.profileImageURL{
             cell.profileImageView.loadImageFromCache(withUrl: profileImageURL)
+        }
+        
+        if let messageImageURL = message.imageUrl{
+            cell.messageImageView.loadImageFromCache(withUrl: messageImageURL)
+            cell.messageImageView.isHidden = false
+            cell.bubbleView.backgroundColor = UIColor.clear
+        }
+        else{
+            cell.messageImageView.isHidden = true
         }
         
         if message.fromId == Auth.auth().currentUser?.uid{
