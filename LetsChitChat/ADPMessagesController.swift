@@ -63,10 +63,10 @@ class ADPMessagesController: UITableViewController {
     func fetchMessages(withMessageId messageId: String) {
         let messageRef = Database.database().reference().child("messages").child(messageId)
         messageRef.observe(.value, with: { (messageSnapshot) in
-            let message = ChatMessage()
+            
             if let chatData = messageSnapshot.value as? [String: AnyObject]{
                 
-                message.setValuesForKeys(chatData)
+                let message = ChatMessage(dictionary: chatData)
                 
                 if let chatPartnerId = message.chatPartnerId(){
                     self.messageDictionary[chatPartnerId] = message

@@ -14,7 +14,13 @@ class NewMessageCell : UITableViewCell{
     var message: ChatMessage? {
         didSet{
             setupNameAndUserProfileImage()
-            detailTextLabel?.text = message?.text
+            if let messageText = message?.text{
+                detailTextLabel?.text = messageText;
+            }
+            else{
+                detailTextLabel?.text = "Sent an image..!!"
+            }
+            
             if let seconds = message?.timestamp?.doubleValue{
                 let date = Date(timeIntervalSince1970: seconds)
                 let dateFormatter =  DateFormatter()

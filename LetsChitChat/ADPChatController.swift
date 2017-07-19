@@ -38,13 +38,14 @@ class ADPChatController: UICollectionViewController {
                     return
                 }
                 
-                let message = ChatMessage()
-                message.setValuesForKeys(messageData)
+                let message = ChatMessage(dictionary: messageData)
                 
                 self.messages.append(message)
                 
                 DispatchQueue.main.async {
                     self.collectionView?.reloadData()
+                    let indexPath = IndexPath(item: self.messages.count - 1, section: 0)
+                    self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
                 
             }, withCancel: nil)
@@ -68,6 +69,7 @@ class ADPChatController: UICollectionViewController {
         collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.alwaysBounceVertical = true
         collectionView?.keyboardDismissMode = .interactive
+        setUpKeyboarsObservers()
     }
     
     lazy var inputContainerView:UIView = {
@@ -148,8 +150,14 @@ class ADPChatController: UICollectionViewController {
     }
     
     func setUpKeyboarsObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow(notification:)), name: .UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide(notification:)), name: .UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardDidShow), name: .UIKeyboardDidShow, object: nil)
+    }
+    
+    func handleKeyboardDidShow() {
+        if messages.count > 0{
+            let indexPath = IndexPath(item: messages.count - 1, section: 0)
+            collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        }
     }
     
     func handleKeyboardWillShow(notification: NSNotification) {
@@ -218,39 +226,23 @@ class ADPChatController: UICollectionViewController {
     }
     
     func sendMesage() {
-        let ref = Database.database().reference().child("messages")
-        let childRef = ref.childByAutoId()
-        let userId = user!.id!
-        let fromUserId = Auth.auth().currentUser!.uid
-        let timestamp: NSNumber = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
-        let values = ["text" : inputTextField.text!, "toId": userId, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
-        //childRef.updateChildValues(values)
-        childRef.updateChildValues(values, withCompletionBlock: { (error,  ref) in
-            if error != nil{
-                print(error!)
-                return
-            }
-            
-            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserId).child(userId)
-            
-            let messageId = childRef.key
-            userMessageRef.updateChildValues([messageId: 1])
-            
-            let recepientUserMessageRef = Database.database().reference().child("user-messages").child(userId).child(fromUserId)
-            recepientUserMessageRef.updateChildValues([messageId: 1])
-        })
-        
+        let properties: [String : Any] = ["text" : inputTextField.text!]
+        sendMessageWithProperties(properties: properties)
         inputTextField.text = nil
     }
     
-    fileprivate func sendMessage(withImageURL url:String){
+    private func sendMessageWithProperties(properties: [String: Any]) {
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
         let userId = user!.id!
         let fromUserId = Auth.auth().currentUser!.uid
         let timestamp: NSNumber = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
-        let values = ["imageUrl" : url, "toId": userId, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
-        //childRef.updateChildValues(values)
+        var values = ["toId": userId, "fromId" : fromUserId, "timestamp": timestamp] as [String : Any]
+        
+        properties.forEach({
+            values[$0] = $1
+        })
+        
         childRef.updateChildValues(values, withCompletionBlock: { (error,  ref) in
             if error != nil{
                 print(error!)
@@ -265,6 +257,12 @@ class ADPChatController: UICollectionViewController {
             let recepientUserMessageRef = Database.database().reference().child("user-messages").child(userId).child(fromUserId)
             recepientUserMessageRef.updateChildValues([messageId: 1])
         })
+    }
+    
+    fileprivate func sendMessage(withImageURL url:String, image: UIImage){
+        let properties: [String : Any] = ["imageUrl" : url, "imageWidth" : image.size.width, "imageHeight": image.size.height]
+        sendMessageWithProperties(properties: properties)
+       
     }
 }
 
@@ -307,7 +305,7 @@ extension ADPChatController: UIImagePickerControllerDelegate, UINavigationContro
                 }
                 
                 if let imageUrl = metadata?.downloadURL()?.absoluteString{
-                    self.sendMessage(withImageURL: imageUrl)
+                    self.sendMessage(withImageURL: imageUrl, image: image)
                 }
             })
         }
@@ -320,9 +318,13 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         var height = CGFloat(80)
-        //var width =
-        if let text = messages[indexPath.item].text{
+        let message = messages[indexPath.item]
+        
+        if let text = message.text{
             height = estimatedFrame(forText: text).height + 20
+        }
+        else if let imageWidth = message.imageWidth?.floatValue, let imageHeight = message.imageHeight?.floatValue{
+            height = CGFloat(imageHeight / imageWidth * 200)
         }
         
         let width = UIScreen.main.bounds.width
@@ -346,6 +348,9 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
         setUpCell(cell: cell, message: message)
         if let messageText = message.text{
             cell.bubbleWidthAnchor?.constant = estimatedFrame(forText: messageText).width + 32
+        }
+        else if message.imageUrl != nil{
+            cell.bubbleWidthAnchor?.constant = 200
         }
         
         return cell
