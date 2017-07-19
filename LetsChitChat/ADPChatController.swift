@@ -21,6 +21,9 @@ class ADPChatController: UICollectionViewController {
     }
     
     var messages = [ChatMessage]()
+    var startingFrame: CGRect?
+    var blackBackgroundView: UIView?
+    var startingImageView: UIImageView?
     
     func observeMessageForUser() {
         guard let uid = Auth.auth().currentUser?.uid, let toId = user?.id else {
@@ -309,8 +312,52 @@ extension ADPChatController: UIImagePickerControllerDelegate, UINavigationContro
                 }
             })
         }
+    }
+    
+    func handleZoomOut(tapGesture: UITapGestureRecognizer) {
+        if let zoomOutImageView = tapGesture.view as? UIImageView{
+            zoomOutImageView.layer.cornerRadius = 16
+            zoomOutImageView.clipsToBounds = true
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                zoomOutImageView.frame = self.startingFrame!
+                self.blackBackgroundView?.alpha = 0
+                self.inputContainerView.alpha = 1
+            }, completion: { (completed) in
+                zoomOutImageView.removeFromSuperview()
+                self.startingImageView?.isHidden = false
+            })
+        }
+    }
+    
+    func performZoomInForImageview(startingImageView: UIImageView) {
+        self.startingImageView = startingImageView
+        self.startingImageView?.isHidden = true
         
+        startingFrame = startingImageView.superview?.convert(startingImageView.frame, to: nil)
         
+        let zoomingImageView = UIImageView(frame: startingFrame!)
+        zoomingImageView.backgroundColor = UIColor.red
+        zoomingImageView.image = startingImageView.image
+        zoomingImageView.isUserInteractionEnabled = true
+        zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleZoomOut(tapGesture:))))
+        
+        if let keyWindow = UIApplication.shared.keyWindow{
+            blackBackgroundView = UIView(frame: keyWindow.frame)
+            blackBackgroundView?.backgroundColor = UIColor.black
+            blackBackgroundView?.alpha = 0
+            keyWindow.addSubview(blackBackgroundView!)
+            
+            keyWindow.addSubview(zoomingImageView)
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                let height = (self.startingFrame?.height)! / (self.startingFrame?.width)! * keyWindow.frame.width
+                zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
+                self.blackBackgroundView?.alpha = 1
+                self.inputContainerView.alpha = 0
+                zoomingImageView.center = keyWindow.center
+            }, completion: nil)
+        }
     }
 }
 
@@ -345,12 +392,15 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
         let message = messages[indexPath.item]
         cell.textView.text = message.text
+        cell.chatLogController = self
         setUpCell(cell: cell, message: message)
         if let messageText = message.text{
             cell.bubbleWidthAnchor?.constant = estimatedFrame(forText: messageText).width + 32
+            cell.textView.isHidden = false
         }
         else if message.imageUrl != nil{
             cell.bubbleWidthAnchor?.constant = 200
+            cell.textView.isHidden = true
         }
         
         return cell
