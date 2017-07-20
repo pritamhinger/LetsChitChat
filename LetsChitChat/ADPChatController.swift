@@ -8,6 +8,8 @@
 
 import UIKit
 import Firebase
+import MobileCoreServices
+import AVFoundation
 
 class ADPChatController: UICollectionViewController {
 
@@ -145,6 +147,7 @@ class ADPChatController: UICollectionViewController {
         let imagePickerVC = UIImagePickerController()
         imagePickerVC.delegate = self
         imagePickerVC.allowsEditing = true
+        imagePickerVC.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String]
         present(imagePickerVC, animated: true, completion: nil)
     }
     
@@ -234,7 +237,7 @@ class ADPChatController: UICollectionViewController {
         inputTextField.text = nil
     }
     
-    private func sendMessageWithProperties(properties: [String: Any]) {
+    fileprivate func sendMessageWithProperties(properties: [String: Any]) {
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
         let userId = user!.id!
@@ -282,6 +285,63 @@ extension ADPChatController: UIImagePickerControllerDelegate, UINavigationContro
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        if let videoUrl = info[UIImagePickerControllerMediaURL] as? URL{
+            handleVideoSelectedForUrl(url: videoUrl)
+        }
+        else{
+            handleImageSelectedForInfo(info: info)
+        }
+        
+        dismiss(animated: true, completion: nil )
+    }
+    
+    private func handleVideoSelectedForUrl(url: URL) {
+        let filename = "\(UUID().uuidString).mov"
+        let uploadTask = Storage.storage().reference().child("message-movies").child(filename).putFile(from: url, metadata: nil, completion: { (metadata, error) in
+            if error != nil{
+                print(error!)
+                return
+            }
+            
+            if let videoUrl = metadata?.downloadURL()?.absoluteString{
+                print(videoUrl)
+                if let thumbnailImage = self.thumbnailImageForURL(fileUrl: url){
+                    //"imageUrl" : url,
+                    
+                    self.uploadImageToFirebaseStorage(image: thumbnailImage, completion: { (imageUrl) in
+                        let properties: [String : Any] = ["imageUrl": imageUrl,"videoUrl" : videoUrl, "imageWidth" : thumbnailImage.size.width, "imageHeight": thumbnailImage.size.height]
+                        self.sendMessageWithProperties(properties: properties)
+                    })
+                }
+            }
+        })
+        
+        uploadTask.observe(.progress, handler: { (snapshot) in
+            if let completedUnitCount = snapshot.progress?.completedUnitCount{
+                self.navigationItem.title = "\(completedUnitCount)"
+            }
+        })
+        
+        uploadTask.observe(.success, handler: { (snapshot) in
+            self.navigationItem.title = self.user?.name
+        })
+    }
+    
+    func thumbnailImageForURL(fileUrl: URL) -> UIImage?{
+        let asset = AVAsset(url: fileUrl)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        do{
+            let thumbnailCGImage = try imageGenerator.copyCGImage(at: CMTimeMake(1, 60), actualTime: nil)
+            return UIImage(cgImage: thumbnailCGImage)
+        } catch let err{
+            print(err)
+        }
+        
+        return nil
+    }
+    
+    private func handleImageSelectedForInfo(info: [String: Any]) {
         var selectedImageFromPicker:UIImage?
         if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage{
             selectedImageFromPicker = editedImage
@@ -290,13 +350,14 @@ extension ADPChatController: UIImagePickerControllerDelegate, UINavigationContro
         }
         
         if let newImage = selectedImageFromPicker{
-            uploadImageToFirebaseStorage(image: newImage)
+            uploadImageToFirebaseStorage(image: newImage, completion: { (imageUrl) in
+                self.sendMessage(withImageURL: imageUrl, image: newImage)
+            })
+            //uploadImageToFirebaseStorage(image: newImage)
         }
-        
-        dismiss(animated: true, completion: nil )
     }
     
-    func uploadImageToFirebaseStorage(image: UIImage) {
+    func uploadImageToFirebaseStorage(image: UIImage, completion: @escaping ( _ imageUrl: String) -> ()) {
         
         let imageName = UUID().uuidString
         let ref = Storage.storage().reference().child("message_images").child(imageName)
@@ -308,7 +369,7 @@ extension ADPChatController: UIImagePickerControllerDelegate, UINavigationContro
                 }
                 
                 if let imageUrl = metadata?.downloadURL()?.absoluteString{
-                    self.sendMessage(withImageURL: imageUrl, image: image)
+                    completion(imageUrl)
                 }
             })
         }
