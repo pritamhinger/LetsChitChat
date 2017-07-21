@@ -454,7 +454,9 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
         let message = messages[indexPath.item]
         cell.textView.text = message.text
         cell.chatLogController = self
+        cell.message = message
         setUpCell(cell: cell, message: message)
+        
         if let messageText = message.text{
             cell.bubbleWidthAnchor?.constant = estimatedFrame(forText: messageText).width + 32
             cell.textView.isHidden = false
@@ -462,7 +464,15 @@ extension ADPChatController: UICollectionViewDelegateFlowLayout{
         else if message.imageUrl != nil{
             cell.bubbleWidthAnchor?.constant = 200
             cell.textView.isHidden = true
+            if message.videoUrl != nil{
+                print(message.videoUrl!)
+            }
+            else{
+                print("No Video URL")
+            }
         }
+        
+        cell.playButton.isHidden = message.videoUrl == nil
         
         return cell
     }
