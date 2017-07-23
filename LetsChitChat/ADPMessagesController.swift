@@ -29,6 +29,7 @@ class ADPMessagesController: UITableViewController {
         checkIfUserIsLoggedIn()
         
         tableView.register(NewMessageCell.self, forCellReuseIdentifier: cellId)
+        tableView.allowsSelectionDuringEditing = true
     }
     
     func observeUserMessage() {
@@ -44,6 +45,11 @@ class ADPMessagesController: UITableViewController {
                 let messageId = snapshot.key
                 self.fetchMessages(withMessageId: messageId)
             }, withCancel: nil)
+        }, withCancel: nil)
+        
+        ref.observe(.childRemoved, with: { (snapshot) in
+            self.messageDictionary.removeValue(forKey: snapshot.key)
+            self.handleReloadTable()
         }, withCancel: nil)
     }
     
@@ -192,6 +198,32 @@ class ADPMessagesController: UITableViewController {
 extension ADPMessagesController{
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messages.count
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
+        guard let uid = Auth.auth().currentUser?.uid else{
+            return
+        }
+        
+        let message = self.messages[indexPath.item]
+        if let chatPartnerId = message.chatPartnerId(){
+            Database.database().reference().child("user-messages").child(uid).child(chatPartnerId).removeValue(completionBlock: { (error, ref) in
+                if error != nil{
+                    print(error!)
+                    return
+                }
+                
+                self.messageDictionary.removeValue(forKey: chatPartnerId)
+                self.handleReloadTable()
+            })
+        }
+        
+        
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
