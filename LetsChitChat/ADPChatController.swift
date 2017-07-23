@@ -58,14 +58,6 @@ class ADPChatController: UICollectionViewController {
         }, withCancel: nil)
     }
     
-    lazy var inputTextField : UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Enter message to send..."
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.delegate = self
-        return textField
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -77,54 +69,10 @@ class ADPChatController: UICollectionViewController {
         setUpKeyboarsObservers()
     }
     
-    lazy var inputContainerView:UIView = {
-        let containerView = UIView()
-        containerView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50)
-        containerView.backgroundColor = UIColor.white
-        
-        let imagePickerButtonImageView = UIImageView()
-        imagePickerButtonImageView.image = UIImage(named: "imagePicker")
-        imagePickerButtonImageView.translatesAutoresizingMaskIntoConstraints = false
-        imagePickerButtonImageView.isUserInteractionEnabled = true
-        imagePickerButtonImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(pickImageToSend)))
-        
-        containerView.addSubview(imagePickerButtonImageView)
-        
-        imagePickerButtonImageView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        imagePickerButtonImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        imagePickerButtonImageView.widthAnchor.constraint(equalToConstant: 44).isActive = true
-        imagePickerButtonImageView.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        
-        let sendButton = UIButton(type: .system)
-        sendButton.setTitle("Send", for: .normal)
-        sendButton.addTarget(self, action: #selector(sendMesage), for: .touchUpInside)
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(sendButton)
-        
-        sendButton.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        sendButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        sendButton.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        
-        containerView.addSubview(self.inputTextField)
-        
-        self.inputTextField.leftAnchor.constraint(equalTo: imagePickerButtonImageView.rightAnchor, constant: 8).isActive = true
-        self.inputTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
-        self.inputTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        
-        let separatorView = UIView()
-        separatorView.backgroundColor = UIColor(r: 220, g: 220, b: 220)
-        separatorView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(separatorView)
-        
-        separatorView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        separatorView.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        separatorView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        separatorView.heightAnchor.constraint(equalToConstant: 1).isActive = true
-
-        
-        return containerView
+    lazy var inputContainerView:ChatInputContainerView = {
+        let chatInputContainerView = ChatInputContainerView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50))
+        chatInputContainerView.chatLogController = self 
+        return chatInputContainerView
     }()
     
     override var inputAccessoryView: UIView?{
@@ -189,52 +137,10 @@ class ADPChatController: UICollectionViewController {
     
     var containerViewBottomAnchor: NSLayoutConstraint?
     
-    func setUpInputComponents() {
-        let containerView = UIView()
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.backgroundColor = UIColor.white
-        view.addSubview(containerView)
-        
-        containerView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        containerViewBottomAnchor = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        containerViewBottomAnchor?.isActive = true
-        containerView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
-        containerView.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        
-        let sendButton = UIButton(type: .system)
-        sendButton.setTitle("Send", for: .normal)
-        sendButton.addTarget(self, action: #selector(sendMesage), for: .touchUpInside)
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(sendButton)
-        
-        sendButton.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        sendButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        sendButton.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        
-        containerView.addSubview(inputTextField)
-        
-        inputTextField.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 8).isActive = true
-        inputTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
-        inputTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        
-        let separatorView = UIView()
-        separatorView.backgroundColor = UIColor(r: 220, g: 220, b: 220)
-        separatorView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(separatorView)
-        
-        separatorView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        separatorView.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        separatorView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        separatorView.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        
-    }
-    
     func sendMesage() {
-        let properties: [String : Any] = ["text" : inputTextField.text!]
+        let properties: [String : Any] = ["text" : inputContainerView.inputTextField.text!]
         sendMessageWithProperties(properties: properties)
-        inputTextField.text = nil
+        inputContainerView.inputTextField.text = nil
     }
     
     fileprivate func sendMessageWithProperties(properties: [String: Any]) {
@@ -269,13 +175,6 @@ class ADPChatController: UICollectionViewController {
         let properties: [String : Any] = ["imageUrl" : url, "imageWidth" : image.size.width, "imageHeight": image.size.height]
         sendMessageWithProperties(properties: properties)
        
-    }
-}
-
-extension ADPChatController: UITextFieldDelegate{
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        sendMesage()
-        return true
     }
 }
 
